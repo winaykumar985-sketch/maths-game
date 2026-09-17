@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Runner Math</title>
+    <title>Cat Runner Math - Physical Crash Update</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; text-align: center; background-color: #2c3e50; color: white; margin: 0; padding: 10px; touch-action: manipulation; }
         
@@ -32,7 +32,6 @@
     <!-- Menu Screen -->
     <div id="menuScreen">
         <h1>🐈 Cat Runner Math</h1>
-        <p>Help the cat jump by solving math problems. The timer gets faster every jump!</p>
         
         <select id="classSelect">
             <option value="1">Class 1 (Basic Addition)</option>
@@ -77,17 +76,19 @@
         let score = 0;
         let currentClass = 1;
         
-        // Game Animation Variables
+        // Game & Physics Variables
         let isRunning = false;
         let isPausedForQuiz = false;
+        let hasAskedQuiz = false;
+        
         let catX = 50;
         let catY = 220; // Ground level
+        let jumpVelocity = 0;
         let obstacleX = 400;
-        let jumpOffset = 0;
         let backgroundOffset = 0;
 
-        // Quiz & Timer Variables
-        let maxTime = 15.0; // Start with 15 seconds
+        // Quiz Variables
+        let maxTime = 15.0; 
         let currentTime = 15.0;
         let timerInterval;
         let correctOptionIndex = 0;
@@ -98,12 +99,12 @@
             document.getElementById("gameArea").style.display = "block";
             
             score = 0;
-            maxTime = 15.0;
             obstacleX = 400;
             catY = 220;
-            jumpOffset = 0;
+            jumpVelocity = 0;
             isRunning = true;
             isPausedForQuiz = false;
+            hasAskedQuiz = false;
             
             document.getElementById("scoreDisplay").innerText = `Jumps: ${score}`;
             document.getElementById("statusDisplay").innerText = "Running...";
@@ -111,85 +112,85 @@
             gameLoop();
         }
 
-        // --- VISUAL GAME LOOP ---
         function gameLoop() {
             if (!isRunning) return;
 
-            // Clear Canvas
+            // Clear Canvas & Draw Scenery
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, canvas.width, canvas.height); // Sky
+            ctx.fillStyle = "#2ecc71"; ctx.fillRect(0, 250, canvas.width, 50); // Grass
 
-            // Draw Background (Sky)
-            ctx.fillStyle = "#87CEEB";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Ground (Grass)
-            ctx.fillStyle = "#2ecc71";
-            ctx.fillRect(0, 250, canvas.width, 50);
-
-            // Move scenery if not paused
             if (!isPausedForQuiz) {
                 backgroundOffset -= 2;
-                obstacleX -= 3; // Obstacle moves left toward cat
+                obstacleX -= 3.5; 
                 
-                // Draw moving grass lines for speed effect
+                // Draw moving grass lines
                 ctx.fillStyle = "#27ae60";
                 for(let i = 0; i < 10; i++) {
                     ctx.fillRect(((i * 50) + backgroundOffset) % 400, 260, 20, 10);
                 }
                 if (backgroundOffset <= -50) backgroundOffset = 0;
 
-                // TRIGGER POP-UP WHEN OBSTACLE IS NEAR
-                if (obstacleX < catX + 60 && obstacleX > catX) {
+                // 1. TRIGGER POP-UP JUST BEFORE OBSTACLE HITS
+                if (obstacleX <= catX + 90 && !hasAskedQuiz) {
                     isPausedForQuiz = true;
+                    hasAskedQuiz = true;
                     triggerPopUp();
+                }
+
+                // 2. APPLY JUMP PHYSICS 
+                catY -= jumpVelocity;
+                if (catY < 220) {
+                    jumpVelocity -= 0.6; // Gravity pulls cat down
+                } else {
+                    catY = 220;
+                    jumpVelocity = 0;
+                }
+
+                // 3. COLLISION DETECTION (CRASH!)
+                // If obstacle is under the cat, and the cat is not high enough to clear it
+                if (obstacleX < catX + 40 && obstacleX > catX - 20 && catY > 180) {
+                    gameOver();
+                    return; // Stop animation loop immediately
+                }
+
+                // 4. RESET OBSTACLE FOR NEXT JUMP
+                if (obstacleX < -50) {
+                    obstacleX = 400;
+                    hasAskedQuiz = false;
                 }
             }
 
-            // Draw Obstacle (A brick wall)
-            ctx.fillStyle = "#c0392b";
-            ctx.fillRect(obstacleX, 200, 30, 50);
-
-            // Draw Cat Emoji
-            ctx.font = "50px Arial";
-            ctx.fillText("🐈", catX, catY - jumpOffset);
-
-            // Simple Jump Animation Logic (after answering correctly)
-            if (jumpOffset > 0) {
-                obstacleX -= 5; // Move obstacle past cat while in air
-                jumpOffset -= 2; // Cat comes back down
-            }
+            // Draw Obstacle & Cat
+            ctx.fillStyle = "#c0392b"; ctx.fillRect(obstacleX, 200, 30, 50);
+            ctx.font = "50px Arial"; ctx.fillText("🐈", catX, catY);
 
             requestAnimationFrame(gameLoop);
         }
 
-        // --- QUIZ & TIMER LOGIC ---
         function triggerPopUp() {
-            document.getElementById("statusDisplay").innerText = "JUMP! Answer fast!";
+            document.getElementById("statusDisplay").innerText = "DANGER! Solve to jump!";
             document.getElementById("quizModal").style.display = "block";
             
-            // Adaptive Timer: 15s base, minus 0.5s for every correct answer (minimum 3 seconds)
+            // Speed up the timer as the score gets higher
             maxTime = Math.max(3.0, 15.0 - (score * 0.5));
             currentTime = maxTime;
             
             generateMathProblem();
             
-            // Start Countdown
             timerInterval = setInterval(() => {
                 currentTime -= 0.1;
                 document.getElementById("timerDisplay").innerText = currentTime.toFixed(1) + "s";
 
                 if (currentTime <= 0) {
-                    gameOver("TIME OUT!");
+                    checkAnswer(-1); // -1 triggers a wrong answer due to timeout
                 }
             }, 100);
         }
 
         function generateMathProblem() {
-            let qText = "";
-            let ans = 0;
-            let n1, n2;
+            let qText = ""; let ans = 0; let n1, n2;
 
-            // Syllabus Logic matching Classes 1 to 10
             switch(currentClass) {
                 case 1: n1 = Math.floor(Math.random() * 9) + 1; n2 = Math.floor(Math.random() * 9) + 1; ans = n1 + n2; qText = `${n1} + ${n2} = ?`; break;
                 case 2: n1 = Math.floor(Math.random() * 40) + 10; n2 = Math.floor(Math.random() * 40) + 10; ans = n1 + n2; qText = `${n1} + ${n2} = ?`; break;
@@ -204,9 +205,7 @@
             }
 
             document.getElementById("equation").innerText = qText;
-
-            let fake1 = ans + (Math.floor(Math.random() * 3) + 1);
-            let fake2 = ans - (Math.floor(Math.random() * 3) + 1);
+            let fake1 = ans + (Math.floor(Math.random() * 3) + 1); let fake2 = ans - (Math.floor(Math.random() * 3) + 1);
             if (fake1 === fake2 || fake2 < 0) fake2 = ans + 5;
             if (currentClass === 6) { fake1 = (ans + 1.1).toFixed(1); fake2 = (ans - 1.1).toFixed(1); } 
 
@@ -219,45 +218,55 @@
             document.getElementById("btn2").innerText = options[2];
         }
 
+        // --- NEW ACTION LOGIC ---
         function checkAnswer(selectedIndex) {
             clearInterval(timerInterval);
             
+            // Always close popup instantly
+            document.getElementById("quizModal").style.display = "none";
+            
             if (selectedIndex === correctOptionIndex) {
-                // Correct: Hide pop-up, trigger jump, resume running
-                document.getElementById("quizModal").style.display = "none";
+                // Correct: Trigger jump physics
                 score++;
                 document.getElementById("scoreDisplay").innerText = `Jumps: ${score}`;
                 document.getElementById("statusDisplay").innerText = "Running...";
-                
-                jumpOffset = 80; // Cat jumps up 80 pixels
-                isPausedForQuiz = false; // Resume game loop
-                
-                // Spawn new obstacle far ahead
-                setTimeout(() => { obstacleX = 400; }, 1000); 
-
+                jumpVelocity = 12; 
             } else {
-                gameOver("CRASHED!");
+                // Wrong or Timeout: Do nothing. The cat stays on the ground.
+                // The collision detection in gameLoop() will catch it.
+                document.getElementById("statusDisplay").innerText = "BRACE FOR IMPACT!";
             }
+            
+            // Resume the game loop so the visual action (jump or crash) plays out
+            isPausedForQuiz = false; 
         }
 
-        function gameOver(reason) {
-            clearInterval(timerInterval);
+        function gameOver() {
             isRunning = false;
             
-            // Draw crash text on canvas
-            ctx.fillStyle = "rgba(0,0,0,0.7)";
+            // Draw the transparent black overlay
+            ctx.fillStyle = "rgba(0,0,0,0.85)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#e74c3c";
-            ctx.font = "40px Arial";
-            ctx.fillText(reason, 80, 150);
             
-            document.getElementById("quizModal").style.display = "none";
+            // Draw the required OUT stats directly on the canvas
+            ctx.fillStyle = "#e74c3c";
+            ctx.font = "bold 46px Arial";
+            ctx.fillText("OUT!", 140, 100);
+            
+            ctx.fillStyle = "white";
+            ctx.font = "26px Arial";
+            ctx.fillText(`Class/Standard: ${currentClass}`, 100, 160);
+            
+            ctx.fillStyle = "#f1c40f";
+            ctx.fillText(`Final Score: ${score}`, 130, 210);
+            
             document.getElementById("statusDisplay").innerText = "Game Over";
             
+            // Send back to menu after a few seconds
             setTimeout(() => {
                 document.getElementById("gameArea").style.display = "none";
                 document.getElementById("menuScreen").style.display = "block";
-            }, 3000);
+            }, 4000);
         }
     </script>
 </body>
