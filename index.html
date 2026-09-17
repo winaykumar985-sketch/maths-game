@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Speed Runner - Prototype</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; }
+        .game-container { background: white; max-width: 400px; margin: 0 auto; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; }
+        .problem { font-size: 32px; font-weight: bold; margin: 20px 0; color: #2c3e50; }
+        .lanes { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+        .lane-btn { flex: 1; padding: 15px; font-size: 18px; font-weight: bold; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 5px; transition: 0.2s; }
+        .lane-btn:hover { background-color: #2980b9; }
+        .stats { margin-top: 20px; font-size: 16px; color: #555; display: flex; justify-content: space-between; }
+        .message { margin-top: 15px; font-weight: bold; height: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h2>Math Runner (Standard 2)</h2>
+        
+        <div class="stats">
+            <span id="scoreText">Score: 0</span>
+            <span id="speedText">Speed: Level 1</span>
+        </div>
+
+        <div class="problem" id="mathProblem">Loading...</div>
+
+        <div class="lanes">
+            <button class="lane-btn" onclick="checkAnswer(0)" id="btn0">1</button>
+            <button class="lane-btn" onclick="checkAnswer(1)" id="btn1">2</button>
+            <button class="lane-btn" onclick="checkAnswer(2)" id="btn2">3</button>
+        </div>
+
+        <div class="message" id="feedbackMessage"></div>
+    </div>
+
+    <script>
+        let score = 0;
+        let speedLevel = 1;
+        let correctAnswerIndex = 0;
+
+        function generateProblem() {
+            // Generate simple addition problem
+            let num1 = Math.floor(Math.random() * 10) + 1;
+            let num2 = Math.floor(Math.random() * 10) + 1;
+            let correctAns = num1 + num2;
+            
+            document.getElementById('mathProblem').innerText = `${num1} + ${num2} = ?`;
+
+            // Create fake answers
+            let answers = [correctAns, correctAns + 2, correctAns - 1];
+            
+            // Shuffle answers
+            answers.sort(() => Math.random() - 0.5);
+            correctAnswerIndex = answers.indexOf(correctAns);
+
+            // Update buttons
+            document.getElementById('btn0').innerText = answers[0];
+            document.getElementById('btn1').innerText = answers[1];
+            document.getElementById('btn2').innerText = answers[2];
+        }
+
+        function checkAnswer(selectedIndex) {
+            let messageBox = document.getElementById('feedbackMessage');
+            
+            if (selectedIndex === correctAnswerIndex) {
+                score++;
+                messageBox.style.color = "green";
+                messageBox.innerText = "Correct! Speeding up...";
+                
+                if (score % 3 === 0) {
+                    speedLevel++; // Increase speed every 3 correct answers
+                    document.getElementById('speedText').innerText = `Speed: Level ${speedLevel}`;
+                }
+            } else {
+                messageBox.style.color = "red";
+                messageBox.innerText = "Wrong! Try again.";
+            }
+            
+            document.getElementById('scoreText').innerText = `Score: ${score}`;
+            setTimeout(() => {
+                messageBox.innerText = "";
+                generateProblem();
+            }, 1000);
+        }
+
+        // Start game
+        generateProblem();
+    </script>
+
+</body>
+</html>
