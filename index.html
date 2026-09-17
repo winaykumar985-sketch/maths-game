@@ -3,197 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Runner - Full Game</title>
+    <title>Math Time Attack</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #2c3e50; color: white; margin: 0; padding: 10px; touch-action: manipulation; }
-        h1, h2 { margin: 5px 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #2c3e50; color: white; margin: 0; padding: 20px; touch-action: manipulation; }
         
         /* Menu Styles */
-        #menuScreen { background-color: #ecf0f1; color: #2c3e50; max-width: 350px; margin: 50px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        select, button { width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; border-radius: 5px; border: 1px solid #bdc3c7; }
-        .start-btn { background-color: #27ae60; color: white; font-weight: bold; border: none; cursor: pointer; }
+        #menuScreen { background-color: #ecf0f1; color: #2c3e50; max-width: 400px; margin: 50px auto; padding: 30px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+        h1 { margin-top: 0; color: #e74c3c; font-size: 36px; text-transform: uppercase; }
+        select, button { width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; border-radius: 8px; border: 1px solid #bdc3c7; box-sizing: border-box; }
+        .start-btn { background-color: #27ae60; color: white; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; font-size: 22px; }
+        .start-btn:hover { background-color: #2ecc71; }
         
         /* Game Styles */
-        #gameArea { display: none; }
-        #equation { color: #f1c40f; font-size: 32px; margin: 10px 0; font-weight: bold; background: rgba(0,0,0,0.5); display: inline-block; padding: 5px 15px; border-radius: 10px;}
-        #gameCanvas { background-color: #34495e; border: 4px solid #ecf0f1; border-radius: 10px; display: block; margin: 0 auto; }
-        .controls { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
-        .btn { background-color: #3498db; color: white; padding: 15px 30px; font-size: 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; width: 120px; }
+        #gameArea { display: none; max-width: 500px; margin: 20px auto; }
+        .stats { display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; }
+        #timerDisplay { color: #2ecc71; font-size: 28px; }
+        
+        #equation { background-color: #34495e; color: #f1c40f; font-size: 48px; margin: 20px 0; padding: 40px 20px; font-weight: bold; border-radius: 15px; border: 4px solid #ecf0f1; box-shadow: 0 8px 0 #2c3e50; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .option-btn { background-color: #3498db; color: white; padding: 25px 10px; font-size: 28px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 0 #2980b9; transition: 0.1s; }
+        .option-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #2980b9; }
+        
+        #funnyMessage { margin-top: 25px; font-size: 24px; font-weight: bold; color: #e74c3c; height: 30px; text-transform: uppercase; }
+
+        /* Timer Panic Animation */
+        @keyframes panic { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #e74c3c; } 100% { transform: scale(1); } }
+        .panic-mode { animation: panic 0.5s infinite; color: #e74c3c !important; }
     </style>
 </head>
 <body>
 
-    <!-- Syllabus Selection Menu -->
+    <!-- Menu Screen -->
     <div id="menuScreen">
-        <h1>Math Runner</h1>
-        <p>Select your class to load the syllabus:</p>
+        <h1>Math Panic!</h1>
+        <p style="font-size: 18px; font-weight: bold;">Answer fast. The timer gets faster every round.</p>
         
         <select id="boardSelect">
             <option value="state">Karnataka State Board</option>
-            <option value="cbse">CBSE</option>
+            <option value="cbse">CBSE Board</option>
         </select>
 
         <select id="classSelect">
-            <option value="1">Standard 1 (Basic Addition)</option>
-            <option value="2">Standard 2 (Advanced Addition)</option>
-            <option value="3">Standard 3 (Multiplication)</option>
+            <option value="1">Class 1 (Basic Addition)</option>
+            <option value="2">Class 2 (Double Addition)</option>
+            <option value="3">Class 3 (Multiplication)</option>
+            <option value="4">Class 4 (Subtraction)</option>
+            <option value="5">Class 5 (Basic Division)</option>
+            <option value="6">Class 6 (Decimals)</option>
+            <option value="7">Class 7 (Basic Algebra)</option>
+            <option value="8">Class 8 (Squares)</option>
+            <option value="9">Class 9 (Square Roots)</option>
+            <option value="10">Class 10 (Linear Equations)</option>
         </select>
 
-        <button class="start-btn" onclick="startGame()">Load Textbook & Start</button>
+        <button class="start-btn" onclick="startGame()">START SURVIVAL</button>
     </div>
 
-    <!-- The Running Game -->
+    <!-- Game Screen -->
     <div id="gameArea">
-        <div id="scoreDisplay">Score: 0 | Speed: Level 1</div>
+        <div class="stats">
+            <div id="scoreDisplay">Score: 0</div>
+            <div id="timerDisplay">30.0s</div>
+        </div>
+        
         <div id="equation">Loading...</div>
         
-        <canvas id="gameCanvas" width="300" height="400"></canvas>
-
-        <div class="controls">
-            <button class="btn" onclick="moveLeft()">⬅️ LEFT</button>
-            <button class="btn" onclick="moveRight()">RIGHT ➡️</button>
+        <div class="options-grid">
+            <button class="option-btn" onclick="checkAnswer(0)" id="btn0">A</button>
+            <button class="option-btn" onclick="checkAnswer(1)" id="btn1">B</button>
+            <button class="option-btn" onclick="checkAnswer(2)" id="btn2">C</button>
         </div>
+
+        <div id="funnyMessage"></div>
     </div>
 
     <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-
-        let playerLane = 1; 
         let score = 0;
-        let speed = 1.2; // Drastically reduced starting speed
-        let speedLevel = 1;
-        let obsY = -50;
-        let answers = [0, 0, 0];
-        let correctLane = 0;
-        let gameOver = false;
-        let trackOffset = 0;
-        let currentStandard = 1;
+        let maxTime = 30.0; // Start with 30 seconds
+        let currentTime = 30.0;
+        let timerInterval;
+        let correctOptionIndex = 0;
+        let currentClass = 1;
+
+        const funnyMessages = ["FASTER!", "BRAIN MELTING!", "DON'T PANIC!", "TOO SLOW!", "HURRY UP!", "TICK TOCK!"];
 
         function startGame() {
-            // Read selected class
-            currentStandard = parseInt(document.getElementById("classSelect").value);
-            
-            // Hide menu, show game
+            currentClass = parseInt(document.getElementById("classSelect").value);
             document.getElementById("menuScreen").style.display = "none";
             document.getElementById("gameArea").style.display = "block";
             
-            // Reset variables
             score = 0;
-            speed = 1.2;
-            speedLevel = 1;
-            playerLane = 1;
-            gameOver = false;
+            maxTime = 30.0;
+            document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
+            document.getElementById("funnyMessage").innerText = "";
             
-            newProblem();
-            draw();
+            nextProblem();
         }
 
-        function newProblem() {
-            let n1, n2, ans;
-
-            // Logic matching the selected syllabus standard
-            if (currentStandard === 1) {
-                n1 = Math.floor(Math.random() * 5) + 1;
-                n2 = Math.floor(Math.random() * 5) + 1;
-                ans = n1 + n2;
-                document.getElementById("equation").innerText = `${n1} + ${n2} = ?`;
-            } else if (currentStandard === 2) {
-                n1 = Math.floor(Math.random() * 15) + 5;
-                n2 = Math.floor(Math.random() * 10) + 5;
-                ans = n1 + n2;
-                document.getElementById("equation").innerText = `${n1} + ${n2} = ?`;
-            } else if (currentStandard === 3) {
-                n1 = Math.floor(Math.random() * 5) + 2;
-                n2 = Math.floor(Math.random() * 5) + 2;
-                ans = n1 * n2;
-                document.getElementById("equation").innerText = `${n1} x ${n2} = ?`;
-            }
+        function nextProblem() {
+            clearInterval(timerInterval);
             
-            // Create fake answers and assign correct lane
-            answers = [ans + 1, ans - 1, ans + 2];
-            correctLane = Math.floor(Math.random() * 3);
-            answers[correctLane] = ans;
+            // Decrease max time for the next round (minimum 3 seconds)
+            maxTime = Math.max(3.0, 30.0 - (score * 2.0));
+            currentTime = maxTime;
             
-            obsY = -50; 
+            document.getElementById("timerDisplay").classList.remove("panic-mode");
+            document.getElementById("timerDisplay").style.color = "#2ecc71";
+            
+            generateMathProblem();
+            startTimer();
         }
 
-        function draw() {
-            if (gameOver) return;
+        function generateMathProblem() {
+            let qText = "";
+            let ans = 0;
+            let n1, n2;
 
-            // Clear screen
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw moving track lines to simulate running forward
-            trackOffset += speed;
-            if (trackOffset > 40) trackOffset = 0;
-
-            ctx.strokeStyle = "#7f8c8d";
-            ctx.lineWidth = 4;
-            ctx.setLineDash([20, 20]); // Dashed lines
-            
-            ctx.beginPath(); 
-            ctx.moveTo(100, -40 + trackOffset); 
-            ctx.lineTo(100, 400); 
-            ctx.stroke();
-            
-            ctx.beginPath(); 
-            ctx.moveTo(200, -40 + trackOffset); 
-            ctx.lineTo(200, 400); 
-            ctx.stroke();
-            
-            ctx.setLineDash([]); // Reset dashed lines for boxes
-
-            // Move obstacle down
-            obsY += speed;
-
-            // Draw the 3 answer boxes
-            for (let i = 0; i < 3; i++) {
-                ctx.fillStyle = "#e74c3c";
-                ctx.fillRect(i * 100 + 10, obsY, 80, 50);
-                ctx.fillStyle = "white";
-                ctx.font = "24px Arial";
-                ctx.fillText(answers[i], i * 100 + 35, obsY + 33);
+            // Syllabus Logic matching Classes 1 to 10
+            switch(currentClass) {
+                case 1: // Single addition
+                    n1 = Math.floor(Math.random() * 9) + 1; n2 = Math.floor(Math.random() * 9) + 1;
+                    ans = n1 + n2; qText = `${n1} + ${n2} = ?`; break;
+                case 2: // Double addition
+                    n1 = Math.floor(Math.random() * 40) + 10; n2 = Math.floor(Math.random() * 40) + 10;
+                    ans = n1 + n2; qText = `${n1} + ${n2} = ?`; break;
+                case 3: // Multiplication
+                    n1 = Math.floor(Math.random() * 9) + 2; n2 = Math.floor(Math.random() * 9) + 2;
+                    ans = n1 * n2; qText = `${n1} x ${n2} = ?`; break;
+                case 4: // Subtraction
+                    n1 = Math.floor(Math.random() * 50) + 50; n2 = Math.floor(Math.random() * 40) + 10;
+                    ans = n1 - n2; qText = `${n1} - ${n2} = ?`; break;
+                case 5: // Division
+                    n2 = Math.floor(Math.random() * 9) + 2; ans = Math.floor(Math.random() * 9) + 2; n1 = n2 * ans;
+                    qText = `${n1} ÷ ${n2} = ?`; break;
+                case 6: // Decimals
+                    n1 = (Math.random() * 5).toFixed(1); n2 = (Math.random() * 5).toFixed(1);
+                    ans = parseFloat(n1) + parseFloat(n2); ans = Math.round(ans * 10) / 10; qText = `${n1} + ${n2} = ?`; break;
+                case 7: // Basic Algebra
+                    ans = Math.floor(Math.random() * 10) + 2; n2 = Math.floor(Math.random() * 10) + 1; n1 = ans + n2;
+                    qText = `x + ${n2} = ${n1}`; break;
+                case 8: // Squares
+                    n1 = Math.floor(Math.random() * 11) + 2;
+                    ans = n1 * n1; qText = `${n1}² = ?`; break;
+                case 9: // Square roots
+                    ans = Math.floor(Math.random() * 12) + 2; n1 = ans * ans;
+                    qText = `√${n1} = ?`; break;
+                case 10: // Linear Eq (2x = Y)
+                    ans = Math.floor(Math.random() * 10) + 2; n1 = Math.floor(Math.random() * 5) + 2; n2 = ans * n1;
+                    qText = `${n1}x = ${n2}`; break;
             }
 
-            // Draw Player
-            ctx.fillStyle = "#2ecc71";
-            ctx.fillRect(playerLane * 100 + 25, 330, 50, 50);
+            document.getElementById("equation").innerText = qText;
 
-            // Collision Detection
-            if (obsY + 50 > 330 && obsY < 380) {
-                if (playerLane === correctLane) {
-                    score++;
-                    if (score % 3 === 0) {
-                        speed += 0.3; // Speed up slightly
-                        speedLevel++;
-                    }
-                    document.getElementById("scoreDisplay").innerText = `Score: ${score} | Speed: Level ${speedLevel}`;
-                    newProblem();
-                } else {
-                    gameOver = true;
-                    document.getElementById("equation").innerText = "Game Over!";
-                    document.getElementById("equation").style.color = "#e74c3c";
-                    
-                    // Show Restart Button
-                    setTimeout(() => {
-                        document.getElementById("gameArea").style.display = "none";
-                        document.getElementById("menuScreen").style.display = "block";
-                    }, 2000);
+            // Generate fake answers dynamically based on the real answer
+            let fake1 = ans + (Math.floor(Math.random() * 3) + 1);
+            let fake2 = ans - (Math.floor(Math.random() * 3) + 1);
+            if (fake1 === fake2 || fake2 < 0) fake2 = ans + 5;
+            if (currentClass === 6) { fake1 = (ans + 1.1).toFixed(1); fake2 = (ans - 1.1).toFixed(1); } // fix decimals
+
+            let options = [ans, fake1, fake2];
+            options.sort(() => Math.random() - 0.5); // Shuffle
+            correctOptionIndex = options.indexOf(ans);
+
+            document.getElementById("btn0").innerText = options[0];
+            document.getElementById("btn1").innerText = options[1];
+            document.getElementById("btn2").innerText = options[2];
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                currentTime -= 0.1;
+                document.getElementById("timerDisplay").innerText = currentTime.toFixed(1) + "s";
+
+                if (currentTime <= 5.0) {
+                    document.getElementById("timerDisplay").classList.add("panic-mode");
+                    document.getElementById("funnyMessage").innerText = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
                 }
-            }
 
-            requestAnimationFrame(draw);
+                if (currentTime <= 0) {
+                    gameOver("TIME OUT!");
+                }
+            }, 100); // Updates every 100ms
         }
 
-        // Controls
-        function moveLeft() { if (playerLane > 0) playerLane--; }
-        function moveRight() { if (playerLane < 2) playerLane++; }
-        
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowLeft") moveLeft();
-            if (e.key === "ArrowRight") moveRight();
-        });
+        function checkAnswer(selectedIndex) {
+            if (selectedIndex === correctOptionIndex) {
+                score++;
+                document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
+                document.getElementById("funnyMessage").innerText = "";
+                nextProblem();
+            } else {
+                gameOver("WRONG ANSWER!");
+            }
+        }
+
+        function gameOver(reason) {
+            clearInterval(timerInterval);
+            document.getElementById("timerDisplay").innerText = "0.0s";
+            document.getElementById("equation").innerText = reason;
+            document.getElementById("equation").style.color = "#e74c3c";
+            document.getElementById("funnyMessage").innerText = `Final Score: ${score}`;
+            
+            setTimeout(() => {
+                document.getElementById("gameArea").style.display = "none";
+                document.getElementById("menuScreen").style.display = "block";
+                document.getElementById("equation").style.color = "#f1c40f";
+            }, 3000);
+        }
     </script>
 </body>
 </html>
