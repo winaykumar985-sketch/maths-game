@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Runner - CBSE Textbook Edition</title>
+    <title>Cat Runner - Complete Syllabus Edition</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; text-align: center; background-color: #2c3e50; color: white; margin: 0; padding: 10px; touch-action: manipulation; }
         
@@ -18,7 +18,7 @@
         
         #quizModal { display: none; position: absolute; top: 10%; left: 5%; width: 90%; background: rgba(44, 62, 80, 0.95); border: 3px solid #f1c40f; border-radius: 15px; padding: 20px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; }
         #timerDisplay { color: #e74c3c; font-size: 32px; font-weight: bold; margin-bottom: 10px; }
-        #equation { font-size: 24px; color: #f1c40f; font-weight: bold; margin: 15px 0; line-height: 1.4; }
+        #equation { font-size: 22px; color: #f1c40f; font-weight: bold; margin: 15px 0; line-height: 1.4; }
         .options-grid { display: flex; flex-direction: column; gap: 10px; }
         .option-btn { background-color: #3498db; color: white; padding: 15px; font-size: 20px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
     </style>
@@ -26,16 +26,24 @@
 <body>
 
     <div id="menuScreen">
-        <h1>🐈 CBSE Cat Runner</h1>
+        <h1>🐈 Complete Syllabus Run</h1>
         <p>Select your class and exact chapter to begin.</p>
         
         <select id="classSelect" onchange="loadChapters()">
+            <option value="1">Class 1</option>
+            <option value="2">Class 2</option>
+            <option value="3">Class 3</option>
+            <option value="4">Class 4</option>
+            <option value="5">Class 5</option>
             <option value="6">Class 6</option>
             <option value="7">Class 7</option>
+            <option value="8">Class 8</option>
+            <option value="9">Class 9</option>
+            <option value="10">Class 10</option>
         </select>
 
         <select id="chapterSelect">
-            <!-- Chapters will load here automatically -->
+            <!-- Chapters load dynamically -->
         </select>
 
         <button class="start-btn" onclick="startGame()">Start Chapter</button>
@@ -64,36 +72,115 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        // --- THE CBSE TEXTBOOK DATABASE ---
-        // This is where you manually type the exact questions from the textbook.
-        // Add as many chapters and classes as you want using this exact format.
+        // --- THE MASSIVE TEXTBOOK DATABASE ---
         const cbseDatabase = {
-            "6": {
-                "Chapter 1: Knowing Our Numbers": [
-                    { question: "What is the place value of 5 in 8532?", correct: "500", wrong1: "50", wrong2: "5" },
-                    { question: "Estimate 439 + 334 to the nearest hundred.", correct: "700", wrong1: "800", wrong2: "770" },
-                    { question: "What is the Roman numeral for 73?", correct: "LXXIII", wrong1: "LXXII", wrong2: "LXXX" },
-                    { question: "Which is greater: 4892 or 4829?", correct: "4892", wrong1: "4829", wrong2: "Both equal" }
+            "1": {
+                "Chapter 1: Shapes and Space": [
+                    { question: "Which shape rolls on the floor?", correct: "Ball", wrong1: "Box", wrong2: "Book" },
+                    { question: "If you trace a bangle, what shape do you get?", correct: "Circle", wrong1: "Square", wrong2: "Triangle" },
+                    { question: "What shape is a slice of pizza?", correct: "Triangle", wrong1: "Square", wrong2: "Circle" }
                 ],
-                "Chapter 2: Whole Numbers": [
-                    { question: "What is the predecessor of 10000?", correct: "9999", wrong1: "10001", wrong2: "9990" },
-                    { question: "What is the smallest whole number?", correct: "0", wrong1: "1", wrong2: "-1" },
-                    { question: "2 + 3 = 3 + 2. Which property is this?", correct: "Commutative", wrong1: "Associative", wrong2: "Closure" }
+                "Chapter 2: Numbers from 1 to 9": [
+                    { question: "How many legs does a dog have?", correct: "4", wrong1: "2", wrong2: "6" },
+                    { question: "If you have 3 apples and eat 1, how many are left?", correct: "2", wrong1: "3", wrong2: "1" }
+                ]
+            },
+            "2": {
+                "Chapter 1: Addition & Subtraction": [
+                    { question: "A monkey has 15 bananas and finds 5 more. Total?", correct: "20", wrong1: "15", wrong2: "25" },
+                    { question: "There are 30 birds on a tree. 10 fly away. How many remain?", correct: "20", wrong1: "10", wrong2: "30" }
+                ],
+                "Chapter 2: Time": [
+                    { question: "Which day comes right after Tuesday?", correct: "Wednesday", wrong1: "Monday", wrong2: "Thursday" },
+                    { question: "The short hand of the clock points to hours or minutes?", correct: "Hours", wrong1: "Minutes", wrong2: "Seconds" }
+                ]
+            },
+            "3": {
+                "Chapter 1: Division": [
+                    { question: "Vinay and his sister share 18 chocolates equally. How many does his sister get?", correct: "9", wrong1: "8", wrong2: "6" },
+                    { question: "Put 24 flowers equally into 4 vases. How many in each?", correct: "6", wrong1: "4", wrong2: "8" }
+                ],
+                "Chapter 2: Money": [
+                    { question: "You buy a toy for ₹45 and give ₹50. What is your change?", correct: "₹5", wrong1: "₹10", wrong2: "₹15" },
+                    { question: "How many ₹10 coins make ₹100?", correct: "10", wrong1: "5", wrong2: "20" }
+                ]
+            },
+            "4": {
+                "Chapter 1: Tick Tick Tick (Time)": [
+                    { question: "A metro train leaves Dasarahalli at 10:15 AM and travels for 45 mins. Arrival time?", correct: "11:00 AM", wrong1: "11:15 AM", wrong2: "10:45 AM" },
+                    { question: "How many hours are in 2 full days?", correct: "48", wrong1: "24", wrong2: "72" }
+                ],
+                "Chapter 2: Halves and Quarters": [
+                    { question: "What is half of 50?", correct: "25", wrong1: "20", wrong2: "30" },
+                    { question: "If you eat 2 slices of an 8-slice pizza, what fraction did you eat?", correct: "1/4", wrong1: "1/2", wrong2: "1/8" }
+                ]
+            },
+            "5": {
+                "Chapter 1: Area and Perimeter": [
+                    { question: "A square field has a side of 5m. What is its perimeter?", correct: "20m", wrong1: "25m", wrong2: "15m" },
+                    { question: "Length is 4m, Breadth is 3m. What is the area of the rectangle?", correct: "12 sq m", wrong1: "7 sq m", wrong2: "14 sq m" }
+                ],
+                "Chapter 2: Decimals": [
+                    { question: "Convert 5/10 into a decimal.", correct: "0.5", wrong1: "5.0", wrong2: "0.05" },
+                    { question: "Which is heavier: 2.5 kg of iron or 2.05 kg of cotton?", correct: "2.5 kg", wrong1: "2.05 kg", wrong2: "Both equal" }
+                ]
+            },
+            "6": {
+                "Chapter 1: Data Handling": [
+                    { question: "An automated inventory tracker logs 40 units in stock. 15 are sold. How many remain?", correct: "25", wrong1: "15", wrong2: "35" },
+                    { question: "In a bar graph, if 1 unit length = 10 cars, how many cars does a bar of 5 units show?", correct: "50", wrong1: "5", wrong2: "15" }
+                ],
+                "Chapter 2: Introduction to Algebra": [
+                    { question: "If a notebook costs ₹p, how much do 5 notebooks cost?", correct: "5p", wrong1: "p + 5", wrong2: "p/5" },
+                    { question: "Solve for x: x - 4 = 10", correct: "14", wrong1: "6", wrong2: "10" }
                 ]
             },
             "7": {
-                 "Chapter 1: Integers": [
-                     { question: "(-10) + 3 = ?", correct: "-7", wrong1: "-13", wrong2: "7" },
-                     { question: "(-5) x (-4) = ?", correct: "20", wrong1: "-20", wrong2: "-9" },
-                     { question: "Which temperature is colder: -5°C or -8°C?", correct: "-8°C", wrong1: "-5°C", wrong2: "0°C" }
-                 ]
+                "Chapter 1: Integers": [
+                    { question: "A submarine dives 50m below sea level, then rises 20m. What is its depth?", correct: "-30m", wrong1: "-70m", wrong2: "30m" },
+                    { question: "What is (-3) x (-6)?", correct: "18", wrong1: "-18", wrong2: "-9" }
+                ],
+                "Chapter 2: Simple Equations": [
+                    { question: "Twice a number added to 4 gives 14. What is the number?", correct: "5", wrong1: "7", wrong2: "10" },
+                    { question: "Solve: 3p - 2 = 10", correct: "4", wrong1: "3", wrong2: "6" }
+                ]
+            },
+            "8": {
+                "Chapter 1: Comparing Quantities": [
+                    { question: "A shop sells a Lenovo ThinkPad for ₹50,000 with a 10% discount. Final price?", correct: "₹45,000", wrong1: "₹40,000", wrong2: "₹55,000" },
+                    { question: "Find the ratio of 5 km to 500 m.", correct: "10:1", wrong1: "1:10", wrong2: "1:1" }
+                ],
+                "Chapter 2: Linear Equations in One Variable": [
+                    { question: "The sum of two consecutive numbers is 11. What is the smaller number?", correct: "5", wrong1: "6", wrong2: "4" },
+                    { question: "Solve: 2x/3 = 18", correct: "27", wrong1: "12", wrong2: "36" }
+                ]
+            },
+            "9": {
+                "Chapter 1: Probability": [
+                    { question: "If you flip a coin, what is the probability of getting Heads?", correct: "1/2", wrong1: "1", wrong2: "0" },
+                    { question: "A bag has 3 red and 2 blue balls. Probability of drawing a blue ball?", correct: "2/5", wrong1: "3/5", wrong2: "1/2" }
+                ],
+                "Chapter 2: Polynomials": [
+                    { question: "What is the degree of the polynomial 4x³ - 2x² + x?", correct: "3", wrong1: "4", wrong2: "2" },
+                    { question: "Find the value of P(x) = x² - 2x at x = 2.", correct: "0", wrong1: "2", wrong2: "4" }
+                ]
+            },
+            "10": {
+                "Chapter 1: Arithmetic Progressions": [
+                    { question: "A 1 BHK rental agreement starts at ₹10,000/mo and increases by ₹500 yearly. Rent in 3rd year?", correct: "₹11,000", wrong1: "₹11,500", wrong2: "₹10,500" },
+                    { question: "Find the 10th term of the AP: 2, 7, 12, ...", correct: "47", wrong1: "52", wrong2: "42" }
+                ],
+                "Chapter 2: Quadratic Equations": [
+                    { question: "What is the discriminant of x² - 4x + 4 = 0?", correct: "0", wrong1: "4", wrong2: "-4" },
+                    { question: "If the roots are real and equal, the discriminant is...", correct: "Zero", wrong1: "Positive", wrong2: "Negative" }
+                ]
             }
         };
 
         // --- GAME VARIABLES ---
         let score = 0;
         let selectedClass, selectedChapter;
-        let chapterQuestions = []; // The list of available questions for this run
+        let chapterQuestions = []; 
         let currentQuestionObj = null;
         
         let isRunning = false;
@@ -106,7 +193,6 @@
         let maxTime = 15.0; let currentTime = 15.0; let timerInterval;
         let correctOptionIndex = 0;
 
-        // Automatically update the Chapter dropdown when a Class is selected
         function loadChapters() {
             let classSelection = document.getElementById("classSelect").value;
             let chapterDropdown = document.getElementById("chapterSelect");
@@ -120,13 +206,11 @@
                 chapterDropdown.appendChild(opt);
             }
         }
-        window.onload = loadChapters; // Load initially
+        window.onload = loadChapters;
 
         function startGame() {
             selectedClass = document.getElementById("classSelect").value;
             selectedChapter = document.getElementById("chapterSelect").value;
-            
-            // LOAD AND COPY THE QUESTIONS TO MEMORY
             chapterQuestions = [...cbseDatabase[selectedClass][selectedChapter]];
             
             document.getElementById("menuScreen").style.display = "none";
@@ -167,7 +251,7 @@
                 else { catY = 220; jumpVelocity = 0; }
 
                 if (obstacleX < catX + 40 && obstacleX > catX - 20 && catY > 180) {
-                    gameOver("OUT!"); return; 
+                    gameOver("CRASHED!"); return; 
                 }
 
                 if (obstacleX < -50) { obstacleX = 450; hasAskedQuiz = false; }
@@ -180,7 +264,6 @@
         }
 
         function triggerPopUp() {
-            // CHECK IF WE RAN OUT OF QUESTIONS
             if (chapterQuestions.length === 0) {
                 gameOver("CHAPTER COMPLETE!");
                 return;
@@ -202,11 +285,8 @@
         }
 
         function pullTextbookQuestion() {
-            // Pick a random question from the remaining list
             let randomIndex = Math.floor(Math.random() * chapterQuestions.length);
             currentQuestionObj = chapterQuestions[randomIndex];
-            
-            // DELETE IT FROM THE LIST SO IT NEVER REPEATS
             chapterQuestions.splice(randomIndex, 1);
 
             document.getElementById("equation").innerText = currentQuestionObj.question;
@@ -242,12 +322,12 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             ctx.fillStyle = (statusText === "CHAPTER COMPLETE!") ? "#2ecc71" : "#e74c3c";
-            ctx.font = "bold 36px Arial";
-            ctx.fillText(statusText, 40, 100);
+            ctx.font = "bold 34px Arial";
+            ctx.fillText(statusText, 30, 100);
             
             ctx.fillStyle = "white";
             ctx.font = "22px Arial";
-            ctx.fillText(`Class ${selectedClass}: ${selectedChapter}`, 40, 160);
+            ctx.fillText(`Class ${selectedClass}: ${selectedChapter}`, 30, 160);
             
             ctx.fillStyle = "#f1c40f";
             ctx.fillText(`Final Score: ${score}`, 130, 210);
