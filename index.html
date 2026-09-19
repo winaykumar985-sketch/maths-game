@@ -3,61 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Runner Math - Physical Crash Update</title>
+    <title>Cat Runner - CBSE Textbook Edition</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; text-align: center; background-color: #2c3e50; color: white; margin: 0; padding: 10px; touch-action: manipulation; }
         
-        /* Menu Styles */
-        #menuScreen { background-color: #ecf0f1; color: #2c3e50; max-width: 400px; margin: 50px auto; padding: 30px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
+        #menuScreen { background-color: #ecf0f1; color: #2c3e50; max-width: 450px; margin: 50px auto; padding: 30px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
         h1 { margin-top: 0; color: #e67e22; font-size: 32px; }
         select, button { width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; border-radius: 5px; border: 1px solid #bdc3c7; box-sizing: border-box; }
         .start-btn { background-color: #d35400; color: white; font-weight: bold; border: none; cursor: pointer; font-size: 20px; }
         
-        /* Game Area */
-        #gameArea { display: none; position: relative; max-width: 400px; margin: 20px auto; }
+        #gameArea { display: none; position: relative; max-width: 450px; margin: 20px auto; }
         #gameCanvas { background-color: #87CEEB; border: 4px solid #ecf0f1; border-radius: 10px; display: block; width: 100%; }
         .stats { display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; margin-bottom: 10px; }
         
-        /* Pop-Up Quiz Modal */
         #quizModal { display: none; position: absolute; top: 10%; left: 5%; width: 90%; background: rgba(44, 62, 80, 0.95); border: 3px solid #f1c40f; border-radius: 15px; padding: 20px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10; }
         #timerDisplay { color: #e74c3c; font-size: 32px; font-weight: bold; margin-bottom: 10px; }
-        #equation { font-size: 40px; color: #f1c40f; font-weight: bold; margin: 15px 0; }
+        #equation { font-size: 24px; color: #f1c40f; font-weight: bold; margin: 15px 0; line-height: 1.4; }
         .options-grid { display: flex; flex-direction: column; gap: 10px; }
-        .option-btn { background-color: #3498db; color: white; padding: 15px; font-size: 24px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
-        .option-btn:active { background-color: #2980b9; }
+        .option-btn { background-color: #3498db; color: white; padding: 15px; font-size: 20px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- Menu Screen -->
     <div id="menuScreen">
-        <h1>🐈 Cat Runner Math</h1>
+        <h1>🐈 CBSE Cat Runner</h1>
+        <p>Select your class and exact chapter to begin.</p>
         
-        <select id="classSelect">
-            <option value="1">Class 1 (Basic Addition)</option>
-            <option value="2">Class 2 (Double Addition)</option>
-            <option value="3">Class 3 (Multiplication)</option>
-            <option value="4">Class 4 (Subtraction)</option>
-            <option value="5">Class 5 (Basic Division)</option>
-            <option value="6">Class 6 (Decimals)</option>
-            <option value="7">Class 7 (Basic Algebra)</option>
-            <option value="8">Class 8 (Squares)</option>
-            <option value="9">Class 9 (Square Roots)</option>
-            <option value="10">Class 10 (Linear Equations)</option>
+        <select id="classSelect" onchange="loadChapters()">
+            <option value="6">Class 6</option>
+            <option value="7">Class 7</option>
         </select>
-        <button class="start-btn" onclick="startGame()">Start Running</button>
+
+        <select id="chapterSelect">
+            <!-- Chapters will load here automatically -->
+        </select>
+
+        <button class="start-btn" onclick="startGame()">Start Chapter</button>
     </div>
 
-    <!-- Game Screen -->
     <div id="gameArea">
         <div class="stats">
             <div id="scoreDisplay">Jumps: 0</div>
             <div id="statusDisplay">Running...</div>
         </div>
         
-        <canvas id="gameCanvas" width="400" height="300"></canvas>
+        <canvas id="gameCanvas" width="450" height="300"></canvas>
         
-        <!-- The Pop-Up Quiz -->
         <div id="quizModal">
             <div id="timerDisplay">15.0s</div>
             <div id="equation">Loading...</div>
@@ -73,38 +64,76 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
+        // --- THE CBSE TEXTBOOK DATABASE ---
+        // This is where you manually type the exact questions from the textbook.
+        // Add as many chapters and classes as you want using this exact format.
+        const cbseDatabase = {
+            "6": {
+                "Chapter 1: Knowing Our Numbers": [
+                    { question: "What is the place value of 5 in 8532?", correct: "500", wrong1: "50", wrong2: "5" },
+                    { question: "Estimate 439 + 334 to the nearest hundred.", correct: "700", wrong1: "800", wrong2: "770" },
+                    { question: "What is the Roman numeral for 73?", correct: "LXXIII", wrong1: "LXXII", wrong2: "LXXX" },
+                    { question: "Which is greater: 4892 or 4829?", correct: "4892", wrong1: "4829", wrong2: "Both equal" }
+                ],
+                "Chapter 2: Whole Numbers": [
+                    { question: "What is the predecessor of 10000?", correct: "9999", wrong1: "10001", wrong2: "9990" },
+                    { question: "What is the smallest whole number?", correct: "0", wrong1: "1", wrong2: "-1" },
+                    { question: "2 + 3 = 3 + 2. Which property is this?", correct: "Commutative", wrong1: "Associative", wrong2: "Closure" }
+                ]
+            },
+            "7": {
+                 "Chapter 1: Integers": [
+                     { question: "(-10) + 3 = ?", correct: "-7", wrong1: "-13", wrong2: "7" },
+                     { question: "(-5) x (-4) = ?", correct: "20", wrong1: "-20", wrong2: "-9" },
+                     { question: "Which temperature is colder: -5°C or -8°C?", correct: "-8°C", wrong1: "-5°C", wrong2: "0°C" }
+                 ]
+            }
+        };
+
+        // --- GAME VARIABLES ---
         let score = 0;
-        let currentClass = 1;
+        let selectedClass, selectedChapter;
+        let chapterQuestions = []; // The list of available questions for this run
+        let currentQuestionObj = null;
         
-        // Game & Physics Variables
         let isRunning = false;
         let isPausedForQuiz = false;
         let hasAskedQuiz = false;
         
-        let catX = 50;
-        let catY = 220; // Ground level
-        let jumpVelocity = 0;
-        let obstacleX = 400;
-        let backgroundOffset = 0;
+        let catX = 50; let catY = 220; let jumpVelocity = 0;
+        let obstacleX = 450; let backgroundOffset = 0;
 
-        // Quiz Variables
-        let maxTime = 15.0; 
-        let currentTime = 15.0;
-        let timerInterval;
+        let maxTime = 15.0; let currentTime = 15.0; let timerInterval;
         let correctOptionIndex = 0;
 
+        // Automatically update the Chapter dropdown when a Class is selected
+        function loadChapters() {
+            let classSelection = document.getElementById("classSelect").value;
+            let chapterDropdown = document.getElementById("chapterSelect");
+            chapterDropdown.innerHTML = ""; 
+            
+            let chapters = Object.keys(cbseDatabase[classSelection]);
+            for (let i = 0; i < chapters.length; i++) {
+                let opt = document.createElement("option");
+                opt.value = chapters[i];
+                opt.innerText = chapters[i];
+                chapterDropdown.appendChild(opt);
+            }
+        }
+        window.onload = loadChapters; // Load initially
+
         function startGame() {
-            currentClass = parseInt(document.getElementById("classSelect").value);
+            selectedClass = document.getElementById("classSelect").value;
+            selectedChapter = document.getElementById("chapterSelect").value;
+            
+            // LOAD AND COPY THE QUESTIONS TO MEMORY
+            chapterQuestions = [...cbseDatabase[selectedClass][selectedChapter]];
+            
             document.getElementById("menuScreen").style.display = "none";
             document.getElementById("gameArea").style.display = "block";
             
-            score = 0;
-            obstacleX = 400;
-            catY = 220;
-            jumpVelocity = 0;
-            isRunning = true;
-            isPausedForQuiz = false;
-            hasAskedQuiz = false;
+            score = 0; obstacleX = 450; catY = 220; jumpVelocity = 0;
+            isRunning = true; isPausedForQuiz = false; hasAskedQuiz = false;
             
             document.getElementById("scoreDisplay").innerText = `Jumps: ${score}`;
             document.getElementById("statusDisplay").innerText = "Running...";
@@ -115,53 +144,35 @@
         function gameLoop() {
             if (!isRunning) return;
 
-            // Clear Canvas & Draw Scenery
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, canvas.width, canvas.height); // Sky
-            ctx.fillStyle = "#2ecc71"; ctx.fillRect(0, 250, canvas.width, 50); // Grass
+            ctx.fillStyle = "#87CEEB"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#2ecc71"; ctx.fillRect(0, 250, canvas.width, 50);
 
             if (!isPausedForQuiz) {
-                backgroundOffset -= 2;
-                obstacleX -= 3.5; 
+                backgroundOffset -= 2; obstacleX -= 3.5; 
                 
-                // Draw moving grass lines
                 ctx.fillStyle = "#27ae60";
-                for(let i = 0; i < 10; i++) {
-                    ctx.fillRect(((i * 50) + backgroundOffset) % 400, 260, 20, 10);
+                for(let i = 0; i < 12; i++) {
+                    ctx.fillRect(((i * 50) + backgroundOffset) % 450, 260, 20, 10);
                 }
                 if (backgroundOffset <= -50) backgroundOffset = 0;
 
-                // 1. TRIGGER POP-UP JUST BEFORE OBSTACLE HITS
                 if (obstacleX <= catX + 90 && !hasAskedQuiz) {
-                    isPausedForQuiz = true;
-                    hasAskedQuiz = true;
+                    isPausedForQuiz = true; hasAskedQuiz = true;
                     triggerPopUp();
                 }
 
-                // 2. APPLY JUMP PHYSICS 
                 catY -= jumpVelocity;
-                if (catY < 220) {
-                    jumpVelocity -= 0.6; // Gravity pulls cat down
-                } else {
-                    catY = 220;
-                    jumpVelocity = 0;
-                }
+                if (catY < 220) { jumpVelocity -= 0.6; } 
+                else { catY = 220; jumpVelocity = 0; }
 
-                // 3. COLLISION DETECTION (CRASH!)
-                // If obstacle is under the cat, and the cat is not high enough to clear it
                 if (obstacleX < catX + 40 && obstacleX > catX - 20 && catY > 180) {
-                    gameOver();
-                    return; // Stop animation loop immediately
+                    gameOver("OUT!"); return; 
                 }
 
-                // 4. RESET OBSTACLE FOR NEXT JUMP
-                if (obstacleX < -50) {
-                    obstacleX = 400;
-                    hasAskedQuiz = false;
-                }
+                if (obstacleX < -50) { obstacleX = 450; hasAskedQuiz = false; }
             }
 
-            // Draw Obstacle & Cat
             ctx.fillStyle = "#c0392b"; ctx.fillRect(obstacleX, 200, 30, 50);
             ctx.font = "50px Arial"; ctx.fillText("🐈", catX, catY);
 
@@ -169,100 +180,80 @@
         }
 
         function triggerPopUp() {
+            // CHECK IF WE RAN OUT OF QUESTIONS
+            if (chapterQuestions.length === 0) {
+                gameOver("CHAPTER COMPLETE!");
+                return;
+            }
+
             document.getElementById("statusDisplay").innerText = "DANGER! Solve to jump!";
             document.getElementById("quizModal").style.display = "block";
             
-            // Speed up the timer as the score gets higher
-            maxTime = Math.max(3.0, 15.0 - (score * 0.5));
+            maxTime = Math.max(5.0, 15.0 - (score * 0.5));
             currentTime = maxTime;
             
-            generateMathProblem();
+            pullTextbookQuestion();
             
             timerInterval = setInterval(() => {
                 currentTime -= 0.1;
                 document.getElementById("timerDisplay").innerText = currentTime.toFixed(1) + "s";
-
-                if (currentTime <= 0) {
-                    checkAnswer(-1); // -1 triggers a wrong answer due to timeout
-                }
+                if (currentTime <= 0) { checkAnswer(-1); }
             }, 100);
         }
 
-        function generateMathProblem() {
-            let qText = ""; let ans = 0; let n1, n2;
+        function pullTextbookQuestion() {
+            // Pick a random question from the remaining list
+            let randomIndex = Math.floor(Math.random() * chapterQuestions.length);
+            currentQuestionObj = chapterQuestions[randomIndex];
+            
+            // DELETE IT FROM THE LIST SO IT NEVER REPEATS
+            chapterQuestions.splice(randomIndex, 1);
 
-            switch(currentClass) {
-                case 1: n1 = Math.floor(Math.random() * 9) + 1; n2 = Math.floor(Math.random() * 9) + 1; ans = n1 + n2; qText = `${n1} + ${n2} = ?`; break;
-                case 2: n1 = Math.floor(Math.random() * 40) + 10; n2 = Math.floor(Math.random() * 40) + 10; ans = n1 + n2; qText = `${n1} + ${n2} = ?`; break;
-                case 3: n1 = Math.floor(Math.random() * 9) + 2; n2 = Math.floor(Math.random() * 9) + 2; ans = n1 * n2; qText = `${n1} x ${n2} = ?`; break;
-                case 4: n1 = Math.floor(Math.random() * 50) + 50; n2 = Math.floor(Math.random() * 40) + 10; ans = n1 - n2; qText = `${n1} - ${n2} = ?`; break;
-                case 5: n2 = Math.floor(Math.random() * 9) + 2; ans = Math.floor(Math.random() * 9) + 2; n1 = n2 * ans; qText = `${n1} ÷ ${n2} = ?`; break;
-                case 6: n1 = (Math.random() * 5).toFixed(1); n2 = (Math.random() * 5).toFixed(1); ans = parseFloat(n1) + parseFloat(n2); ans = Math.round(ans * 10) / 10; qText = `${n1} + ${n2} = ?`; break;
-                case 7: ans = Math.floor(Math.random() * 10) + 2; n2 = Math.floor(Math.random() * 10) + 1; n1 = ans + n2; qText = `x + ${n2} = ${n1}`; break;
-                case 8: n1 = Math.floor(Math.random() * 11) + 2; ans = n1 * n1; qText = `${n1}² = ?`; break;
-                case 9: ans = Math.floor(Math.random() * 12) + 2; n1 = ans * ans; qText = `√${n1} = ?`; break;
-                case 10: ans = Math.floor(Math.random() * 10) + 2; n1 = Math.floor(Math.random() * 5) + 2; n2 = ans * n1; qText = `${n1}x = ${n2}`; break;
-            }
+            document.getElementById("equation").innerText = currentQuestionObj.question;
 
-            document.getElementById("equation").innerText = qText;
-            let fake1 = ans + (Math.floor(Math.random() * 3) + 1); let fake2 = ans - (Math.floor(Math.random() * 3) + 1);
-            if (fake1 === fake2 || fake2 < 0) fake2 = ans + 5;
-            if (currentClass === 6) { fake1 = (ans + 1.1).toFixed(1); fake2 = (ans - 1.1).toFixed(1); } 
-
-            let options = [ans, fake1, fake2];
+            let options = [currentQuestionObj.correct, currentQuestionObj.wrong1, currentQuestionObj.wrong2];
             options.sort(() => Math.random() - 0.5); 
-            correctOptionIndex = options.indexOf(ans);
+            correctOptionIndex = options.indexOf(currentQuestionObj.correct);
 
             document.getElementById("btn0").innerText = options[0];
             document.getElementById("btn1").innerText = options[1];
             document.getElementById("btn2").innerText = options[2];
         }
 
-        // --- NEW ACTION LOGIC ---
         function checkAnswer(selectedIndex) {
             clearInterval(timerInterval);
-            
-            // Always close popup instantly
             document.getElementById("quizModal").style.display = "none";
             
             if (selectedIndex === correctOptionIndex) {
-                // Correct: Trigger jump physics
                 score++;
                 document.getElementById("scoreDisplay").innerText = `Jumps: ${score}`;
                 document.getElementById("statusDisplay").innerText = "Running...";
                 jumpVelocity = 12; 
             } else {
-                // Wrong or Timeout: Do nothing. The cat stays on the ground.
-                // The collision detection in gameLoop() will catch it.
                 document.getElementById("statusDisplay").innerText = "BRACE FOR IMPACT!";
             }
-            
-            // Resume the game loop so the visual action (jump or crash) plays out
             isPausedForQuiz = false; 
         }
 
-        function gameOver() {
+        function gameOver(statusText) {
             isRunning = false;
             
-            // Draw the transparent black overlay
             ctx.fillStyle = "rgba(0,0,0,0.85)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw the required OUT stats directly on the canvas
-            ctx.fillStyle = "#e74c3c";
-            ctx.font = "bold 46px Arial";
-            ctx.fillText("OUT!", 140, 100);
+            ctx.fillStyle = (statusText === "CHAPTER COMPLETE!") ? "#2ecc71" : "#e74c3c";
+            ctx.font = "bold 36px Arial";
+            ctx.fillText(statusText, 40, 100);
             
             ctx.fillStyle = "white";
-            ctx.font = "26px Arial";
-            ctx.fillText(`Class/Standard: ${currentClass}`, 100, 160);
+            ctx.font = "22px Arial";
+            ctx.fillText(`Class ${selectedClass}: ${selectedChapter}`, 40, 160);
             
             ctx.fillStyle = "#f1c40f";
             ctx.fillText(`Final Score: ${score}`, 130, 210);
             
             document.getElementById("statusDisplay").innerText = "Game Over";
             
-            // Send back to menu after a few seconds
             setTimeout(() => {
                 document.getElementById("gameArea").style.display = "none";
                 document.getElementById("menuScreen").style.display = "block";
